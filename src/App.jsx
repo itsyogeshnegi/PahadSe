@@ -301,7 +301,7 @@ export default function App() {
           {...fadeUp}
           className="rounded-3xl border border-border bg-primary px-6 py-14 text-center text-primary-foreground shadow-[var(--shadow-soft)]"
         >
-          <h2 className="text-4xl md:text-5xl">Ready to taste the pahad?</h2>
+          <h2 className="text-4xl md:text-5xl">Ready to taste ?</h2>
           <p className="mx-auto mt-4 max-w-md text-primary-foreground/80">
             Message us on WhatsApp to place your order. Pahadon ka asli swaad.
           </p>
