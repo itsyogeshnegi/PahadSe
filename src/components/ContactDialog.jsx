@@ -8,10 +8,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-const WHATSAPP_URL =
-  "https://wa.me/919310309829?text=Hi%20Pahad%20Se!%20I%27d%20like%20to%20order.";
+
+const WHATSAPP_NUMBER = "919310309829";
+const DEFAULT_WHATSAPP_MESSAGE = "Hi Pahad Se! I'd like to order.";
+
+function getWhatsAppUrl(productName) {
+  const message = productName
+    ? `Hi Pahad Se! I'd like to order ${productName}.`
+    : DEFAULT_WHATSAPP_MESSAGE;
+
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+const WHATSAPP_URL = getWhatsAppUrl();
 const INSTAGRAM_URL = "https://www.instagram.com/pahadse.store/";
-export function ContactDialog({ trigger }) {
+
+export function ContactDialog({ trigger, productName }) {
+  const whatsappUrl = getWhatsAppUrl(productName);
+
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -22,7 +36,7 @@ export function ContactDialog({ trigger }) {
         <div className="flex flex-col items-center gap-5 pt-2">
           <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
             <QRCodeSVG
-              value={WHATSAPP_URL}
+              value={whatsappUrl}
               size={196}
               bgColor="transparent"
               fgColor="#2d4a36"
@@ -34,7 +48,7 @@ export function ContactDialog({ trigger }) {
           </p>
           <div className="flex w-full flex-col gap-3">
             <Button asChild size="lg" className="w-full">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="size-5" /> Chat: +91 93103 09829
               </a>
             </Button>
@@ -49,4 +63,5 @@ export function ContactDialog({ trigger }) {
     </Dialog>
   );
 }
-export { WHATSAPP_URL, INSTAGRAM_URL };
+
+export { WHATSAPP_URL, INSTAGRAM_URL, getWhatsAppUrl };

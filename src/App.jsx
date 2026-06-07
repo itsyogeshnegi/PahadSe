@@ -254,6 +254,7 @@ export default function App() {
                 <h3 className={`text-3xl ${flavour.accent}`}>{flavour.name}</h3>
                 <p className="mt-3 text-muted-foreground">{flavour.desc}</p>
                 <ContactDialog
+                  productName={flavour.name}
                   trigger={
                     <Button variant="outline" className="mt-6 gap-2">
                       <MessageCircle className="size-4" /> Order this
