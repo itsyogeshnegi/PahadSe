@@ -1,0 +1,14 @@
+{
+  "include": ["src/**/*.js", "src/**/*.jsx", "vite.config.js", "eslint.config.js"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "checkJs": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
