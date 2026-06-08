@@ -2,9 +2,10 @@ import { Instagram, Leaf, MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
 
 import lineup from "@/assets/images/hero-banner.webp";
-import { ContactDialog, INSTAGRAM_URL } from "@/components/ContactDialog";
+import { ContactDialog } from "@/components/ContactDialog";
 import { Button } from "@/components/ui/button";
 import { fadeUp } from "@/components/home/home-motion";
+import { INSTAGRAM_URL } from "@/lib/contact";
 
 export function HeroSection() {
   return (

@@ -1,5 +1,4 @@
-import { QRCodeSVG } from "qrcode.react";
-import { MessageCircle, Instagram } from "lucide-react";
+import { Suspense, cloneElement, isValidElement, lazy } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,61 +6,69 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { getWhatsAppUrl } from "@/lib/contact";
 
-const WHATSAPP_NUMBER = "919310309829";
-const DEFAULT_WHATSAPP_MESSAGE = "Hi Pahad Se! I'd like to order.";
+const loadContactDialogBody = () => import("@/components/ContactDialogBody");
 
-function getWhatsAppUrl(productName) {
-  const message = productName
-    ? `Hi Pahad Se! I'd like to order ${productName}.`
-    : DEFAULT_WHATSAPP_MESSAGE;
+const LazyContactDialogBody = lazy(() => loadContactDialogBody().then((module) => ({
+  default: module.ContactDialogBody,
+})));
 
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+function combineHandlers(...handlers) {
+  return (event) => {
+    handlers.forEach((handler) => handler?.(event));
+  };
 }
 
-const WHATSAPP_URL = getWhatsAppUrl();
-const INSTAGRAM_URL = "https://www.instagram.com/pahadse.store/";
+function ContactDialogFallback({ whatsappUrl }) {
+  return (
+    <div className="flex flex-col items-center gap-5 pt-2">
+      <div className="grid h-[228px] w-[228px] animate-pulse place-items-center rounded-2xl border border-border bg-secondary/70 shadow-[var(--shadow-soft)]">
+        <div className="h-28 w-28 rounded-2xl border border-border/50 bg-card/80" />
+      </div>
+      <p className="text-center text-sm text-muted-foreground">
+        Preparing your WhatsApp order options...
+      </p>
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
+      >
+        Open WhatsApp
+      </a>
+    </div>
+  );
+}
+
+export function preloadContactDialog() {
+  void loadContactDialogBody();
+}
 
 export function ContactDialog({ trigger, productName }) {
   const whatsappUrl = getWhatsAppUrl(productName);
+  const warmDialog = () => preloadContactDialog();
+  const preparedTrigger = isValidElement(trigger)
+    ? cloneElement(trigger, {
+        onClick: combineHandlers(trigger.props.onClick, warmDialog),
+        onFocus: combineHandlers(trigger.props.onFocus, warmDialog),
+        onMouseEnter: combineHandlers(trigger.props.onMouseEnter, warmDialog),
+        onPointerEnter: combineHandlers(trigger.props.onPointerEnter, warmDialog),
+        onTouchStart: combineHandlers(trigger.props.onTouchStart, warmDialog),
+      })
+    : trigger;
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>{preparedTrigger}</DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl text-primary">Order on WhatsApp</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col items-center gap-5 pt-2">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
-            <QRCodeSVG
-              value={whatsappUrl}
-              size={196}
-              bgColor="transparent"
-              fgColor="#2d4a36"
-              level="M"
-            />
-          </div>
-          <p className="text-center text-sm text-muted-foreground">
-            Scan the code, or tap below to chat with us directly.
-          </p>
-          <div className="flex w-full flex-col gap-3">
-            <Button asChild size="lg" className="w-full">
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="size-5" /> Chat: +91 93103 09829
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="w-full">
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-                <Instagram className="size-5" /> @pahadse.store
-              </a>
-            </Button>
-          </div>
-        </div>
+        <Suspense fallback={<ContactDialogFallback whatsappUrl={whatsappUrl} />}>
+          <LazyContactDialogBody whatsappUrl={whatsappUrl} />
+        </Suspense>
       </DialogContent>
     </Dialog>
   );
 }
-
-export { WHATSAPP_URL, INSTAGRAM_URL, getWhatsAppUrl };

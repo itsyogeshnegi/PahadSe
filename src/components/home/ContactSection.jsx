@@ -1,9 +1,10 @@
 import { Instagram, MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
 
-import { ContactDialog, INSTAGRAM_URL } from "@/components/ContactDialog";
+import { ContactDialog } from "@/components/ContactDialog";
 import { fadeUp } from "@/components/home/home-motion";
 import { Button } from "@/components/ui/button";
+import { INSTAGRAM_URL } from "@/lib/contact";
 import { SITE_INSTAGRAM_HANDLE } from "@/lib/site";
 
 export function ContactSection() {

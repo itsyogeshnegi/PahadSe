@@ -1,8 +1,9 @@
 import { Instagram, MessageCircle } from "lucide-react";
 
 import logo from "@/assets/images/pahad-se-logo.webp";
-import { ContactDialog, INSTAGRAM_URL } from "@/components/ContactDialog";
+import { ContactDialog } from "@/components/ContactDialog";
 import { Button } from "@/components/ui/button";
+import { INSTAGRAM_URL } from "@/lib/contact";
 
 export function Header() {
   return (

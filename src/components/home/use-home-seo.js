@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 
-import { INSTAGRAM_URL } from "@/components/ContactDialog";
+import { INSTAGRAM_URL } from "@/lib/contact";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_TAGLINE,
   getAbsoluteSiteUrl,
+  getGoogleSiteVerificationToken,
 } from "@/lib/site";
 import lineup from "@/assets/images/hero-banner.webp";
 
@@ -37,6 +38,7 @@ export function useHomeSeo() {
   useEffect(() => {
     const pageUrl = getAbsoluteSiteUrl("/", window.location.href);
     const imageUrl = getAbsoluteSiteUrl(lineup, window.location.href);
+    const googleSiteVerificationToken = getGoogleSiteVerificationToken();
 
     document.title = `${SITE_NAME} | ${SITE_TAGLINE}`;
     ensureMeta('meta[name="description"]', { name: "description", content: SITE_DESCRIPTION });
@@ -64,6 +66,12 @@ export function useHomeSeo() {
       content: SITE_DESCRIPTION,
     });
     ensureMeta('meta[name="twitter:image"]', { name: "twitter:image", content: imageUrl });
+    if (googleSiteVerificationToken) {
+      ensureMeta('meta[name="google-site-verification"]', {
+        name: "google-site-verification",
+        content: googleSiteVerificationToken,
+      });
+    }
     ensureLink('link[rel="canonical"]', { rel: "canonical", href: pageUrl });
 
     let script = document.getElementById("brand-schema");

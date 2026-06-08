@@ -1,7 +1,7 @@
 import { Instagram, MessageCircle } from "lucide-react";
 
 import logo from "@/assets/images/pahad-se-logo.webp";
-import { INSTAGRAM_URL, WHATSAPP_URL } from "@/components/ContactDialog";
+import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/contact";
 import { SITE_NAME } from "@/lib/site";
 
 export function Footer() {
