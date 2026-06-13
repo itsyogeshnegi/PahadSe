@@ -6,6 +6,7 @@ import {
   FooterFallback,
   ProductsSectionFallback,
   StorySectionFallback,
+  TestimonialsSectionFallback,
 } from "@/components/home/HomeSectionFallbacks";
 import { Header } from "@/components/home/Header";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -15,6 +16,7 @@ import {
   LazyFooter,
   LazyProductsSection,
   LazyStorySection,
+  LazyTestimonialsSection,
   preloadHomeSections,
 } from "@/components/home/home-lazy";
 import { useHomeSeo } from "@/components/home/use-home-seo";
@@ -56,6 +58,9 @@ export default function App() {
         </Suspense>
         <Suspense fallback={<StorySectionFallback />}>
           <LazyStorySection />
+        </Suspense>
+        <Suspense fallback={<TestimonialsSectionFallback />}>
+          <LazyTestimonialsSection />
         </Suspense>
         <Suspense fallback={<ContactSectionFallback />}>
           <LazyContactSection />
