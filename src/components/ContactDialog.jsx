@@ -6,7 +6,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { getWhatsAppUrl } from "@/lib/contact";
+import { getWhatsAppUrl, getWhatsAppCartUrl } from "@/lib/contact";
+import { useCart } from "@/contexts/CartContext";
 
 const loadContactDialogBody = () => import("@/components/ContactDialogBody");
 
@@ -45,8 +46,9 @@ export function preloadContactDialog() {
   void loadContactDialogBody();
 }
 
-export function ContactDialog({ trigger, productName }) {
-  const whatsappUrl = getWhatsAppUrl(productName);
+export function ContactDialog({ trigger, productName, cartCheckout = false }) {
+  const { cart, shippingRegion } = useCart();
+  const whatsappUrl = cartCheckout ? getWhatsAppCartUrl(cart, shippingRegion) : getWhatsAppUrl(productName);
   const warmDialog = () => preloadContactDialog();
   const preparedTrigger = isValidElement(trigger)
     ? cloneElement(trigger, {
@@ -66,7 +68,11 @@ export function ContactDialog({ trigger, productName }) {
           <DialogTitle className="text-center text-2xl text-primary">Order on WhatsApp</DialogTitle>
         </DialogHeader>
         <Suspense fallback={<ContactDialogFallback whatsappUrl={whatsappUrl} />}>
-          <LazyContactDialogBody whatsappUrl={whatsappUrl} />
+          <LazyContactDialogBody
+            primaryUrl={whatsappUrl}
+            isCartCheckout={cartCheckout}
+            cartItems={cart}
+          />
         </Suspense>
       </DialogContent>
     </Dialog>

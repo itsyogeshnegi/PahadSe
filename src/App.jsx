@@ -21,6 +21,7 @@ import {
 } from "@/components/home/home-lazy";
 import { useHomeSeo } from "@/components/home/use-home-seo";
 import { preloadContactDialog } from "@/components/ContactDialog";
+import { CartProvider } from "@/contexts/CartContext";
 
 function scheduleIdleTask(callback) {
   if (typeof window === "undefined") {
@@ -47,7 +48,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <CartProvider>
       <Analytics />
       <div className="min-h-screen bg-background text-foreground">
         <Header />
@@ -69,6 +70,6 @@ export default function App() {
           <LazyFooter />
         </Suspense>
       </div>
-    </>
+    </CartProvider>
   );
 }

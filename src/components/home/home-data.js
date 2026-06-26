@@ -5,14 +5,18 @@ import hariMirch from "@/assets/images/green-chilli.webp";
 
 export const flavours = [
   {
+    id: "red-namak",
     name: "Garlic with Red Chilli",
+    price: 69,
     tags: ["Spicy", "Tangy", "Flavorful"],
     image: garlicChilli,
     desc: "A warm, smoky blend of sun-dried red chilli and pahadi garlic - a little sprinkle wakes up everything from dal to dosa.",
     accent: "text-chili",
   },
   {
+    id: "green-namak",
     name: "Hari Mirch & Jeera",
+    price: 59,
     tags: ["Fresh", "Zesty", "Aromatic"],
     image: hariMirch,
     desc: "Bright green chilli folded with toasted cumin - fresh, fragrant, and gently fiery, the way the hills make it.",
