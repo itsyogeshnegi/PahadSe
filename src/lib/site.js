@@ -1,7 +1,10 @@
 export const SITE_NAME = "Pahad Se";
+export const SITE_TITLE = "PahadSe Taste of Salt | Garlic, Chilli, Hari Mirch & Jeera Salt";
 export const SITE_TAGLINE = "Pahadon ka asli swaad";
 export const SITE_DESCRIPTION =
-  "Pahad Se brings authentic, 100% natural Uttarakhand flavours - Garlic with Red Chilli and Hari Mirch with Jeera. No preservatives, just the real taste of the mountains.";
+  "Experience the authentic taste of the mountains with PahadSe. Discover premium Garlic Salt, Chilli Salt, Hari Mirch Salt, and Jeera Salt made to add natural flavor to every meal.";
+export const SITE_KEYWORDS =
+  "Pahad Se, mountain salt, garlic salt, chilli salt, hari mirch salt, jeera salt, Himalayan salt, flavored salt, natural spices, premium salt, Indian spices, seasoning salt, cooking salt,";
 export const SITE_INSTAGRAM_HANDLE = "@pahadse.store";
 
 function normalizeSiteUrl(value) {

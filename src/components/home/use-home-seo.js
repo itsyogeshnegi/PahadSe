@@ -5,6 +5,8 @@ import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_TAGLINE,
+  SITE_TITLE,
+  SITE_KEYWORDS,
   getAbsoluteSiteUrl,
   getGoogleSiteVerificationToken,
 } from "@/lib/site";
@@ -40,11 +42,12 @@ export function useHomeSeo() {
     const imageUrl = getAbsoluteSiteUrl(lineup, window.location.href);
     const googleSiteVerificationToken = getGoogleSiteVerificationToken();
 
-    document.title = `${SITE_NAME} | ${SITE_TAGLINE}`;
+    document.title = SITE_TITLE;
     ensureMeta('meta[name="description"]', { name: "description", content: SITE_DESCRIPTION });
+    ensureMeta('meta[name="keywords"]', { name: "keywords", content: SITE_KEYWORDS });
     ensureMeta('meta[property="og:title"]', {
       property: "og:title",
-      content: `${SITE_NAME} | ${SITE_TAGLINE}`,
+      content: SITE_TITLE,
     });
     ensureMeta('meta[property="og:description"]', {
       property: "og:description",
@@ -59,7 +62,7 @@ export function useHomeSeo() {
     });
     ensureMeta('meta[name="twitter:title"]', {
       name: "twitter:title",
-      content: `${SITE_NAME} | ${SITE_TAGLINE}`,
+      content: SITE_TITLE,
     });
     ensureMeta('meta[name="twitter:description"]', {
       name: "twitter:description",
