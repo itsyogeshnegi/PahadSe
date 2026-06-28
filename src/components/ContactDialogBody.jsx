@@ -9,7 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItems = [] }) {
   const customUrl = getWhatsAppCustomOrderUrl();
   const [currentMode, setCurrentMode] = useState(isCartCheckout ? "cart" : "custom");
-  const { subtotal, deliveryCharge, total, shippingRegion } = useCart();
+  const { subtotal, deliveryCharge, total, shippingRegion, freePacketsCount } = useCart();
 
   const activeUrl = currentMode === "cart" ? primaryUrl : customUrl;
 
@@ -53,7 +53,13 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
               <span>Rs. {item.price * item.quantity}</span>
             </div>
           ))}
-          <div className="border-t border-border/60 mt-1.5 pt-1.5 space-y-0.5">
+          {freePacketsCount > 0 && (
+            <div className="flex justify-between text-primary font-medium">
+              <span>🎁 Gift Spices Packets x 2</span>
+              <span>Rs. 0</span>
+            </div>
+          )}
+          <div className="border-t border-border/60 mt-1.5 pt-1.5 space-y-0.5 font-sans">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>Rs. {subtotal}</span>

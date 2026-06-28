@@ -83,6 +83,7 @@ export function CartProvider({ children }) {
       ? (subtotal > 0 && subtotal <= 299 ? DELIVERY_CHARGE_DELHI : 0)
       : 0;
   const total = subtotal + deliveryCharge;
+  const freePacketsCount = subtotal >= 399 ? 2 : 0;
 
   return (
     <CartContext.Provider
@@ -98,6 +99,7 @@ export function CartProvider({ children }) {
         total,
         shippingRegion,
         setShippingRegion,
+        freePacketsCount,
       }}
     >
       {children}

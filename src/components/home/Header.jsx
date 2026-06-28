@@ -26,6 +26,7 @@ export function Header() {
     removeFromCart,
     shippingRegion,
     setShippingRegion,
+    freePacketsCount,
   } = useCart();
 
   return (
@@ -146,6 +147,25 @@ export function Header() {
                     </div>
                   ))
                 )}
+                {cart.length > 0 && freePacketsCount > 0 && (
+                  <div className="flex gap-4 p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5 shadow-inner">
+                    <div className="h-16 w-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl select-none">
+                      🎁
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h4 className="font-semibold text-primary text-sm flex items-center gap-1.5">
+                        Free Gift Packs
+                        <span className="text-[9px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-sans uppercase font-bold tracking-wide">
+                          Free
+                        </span>
+                      </h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        2x Organic Pahadi Spices added automatically
+                      </p>
+                      <p className="text-xs font-semibold text-primary mt-1">Rs. 0</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Region Selector */}
@@ -217,6 +237,24 @@ export function Header() {
               </Button>
             }
           />
+        </div>
+      </div>
+
+      {/* Marquee Announcement Bar */}
+      <div className="relative w-full overflow-hidden bg-gold text-gold-foreground py-1.5 text-xs font-semibold uppercase tracking-wider select-none border-t border-border/20">
+        <div className="animate-marquee flex gap-12 whitespace-nowrap">
+          <span>🎉 Special Offer: Order above Rs. 299 for FREE Delivery (Delhi NCR)!</span>
+          <span>•</span>
+          <span>🔥 Super Deal: Order above Rs. 399 and get 2 packets completely FREE!</span>
+          <span>•</span>
+          <span>🎉 Special Offer: Order above Rs. 299 for FREE Delivery (Delhi NCR)!</span>
+          <span>•</span>
+          <span>🔥 Super Deal: Order above Rs. 399 and get 2 packets completely FREE!</span>
+          <span>•</span>
+          <span>🎉 Special Offer: Order above Rs. 299 for FREE Delivery (Delhi NCR)!</span>
+          <span>•</span>
+          <span>🔥 Super Deal: Order above Rs. 399 and get 2 packets completely FREE!</span>
+          <span>•</span>
         </div>
       </div>
     </header>

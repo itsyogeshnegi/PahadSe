@@ -23,15 +23,25 @@ export function getWhatsAppCartUrl(items, shippingRegion = "delhi_ncr") {
     message += `- ${item.name} (${item.quantity} x Rs. ${item.price}) = Rs. ${itemTotal}\n`;
   });
 
+  if (subtotal >= 399) {
+    message += `- 2 x Free Spices Packets = Rs. 0 (Promo: Order >= 399)\n`;
+  }
+
   message += `\nSubtotal: Rs. ${subtotal}`;
 
   if (shippingRegion === "delhi_ncr") {
     const deliveryCharge = subtotal > 299 ? 0 : DELIVERY_CHARGE_DELHI;
     const total = subtotal + deliveryCharge;
     message += `\nDelivery Charges (Delhi NCR): ${deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge}`}`;
+    if (subtotal >= 399) {
+      message += `\nGift Offer: 2 Packets FREE applied!`;
+    }
     message += `\nTotal Amount: Rs. ${total}\n\n`;
   } else {
     message += `\nDelivery Charges (Other State): To be discussed/calculated on WhatsApp`;
+    if (subtotal >= 399) {
+      message += `\nGift Offer: 2 Packets FREE applied!`;
+    }
     message += `\nTotal Amount: Rs. ${subtotal} + Shipping Charges\n\n`;
     message += "*Note: Delivery region is outside Delhi NCR. Need shipping quotes discussed.*\n\n";
   }
