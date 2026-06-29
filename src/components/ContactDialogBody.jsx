@@ -4,6 +4,7 @@ import { Instagram, MessageCircle } from "lucide-react";
 
 import { INSTAGRAM_URL, getWhatsAppCustomOrderUrl } from "@/lib/contact";
 import { Button } from "@/components/ui/button";
+import { MissingShippingDetailsDialog } from "@/components/MissingShippingDetailsDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
@@ -19,6 +20,7 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
   const [shippingName, setShippingName] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [shippingPincode, setShippingPincode] = useState("");
+  const [showMissingDetailsDialog, setShowMissingDetailsDialog] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -43,7 +45,7 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
   const handleCheckoutClick = async () => {
     if (currentMode === "cart") {
       if (!shippingName.trim() || !shippingAddress.trim() || !shippingPincode.trim()) {
-        alert("Please enter your name, address, and pincode before checking out.");
+        setShowMissingDetailsDialog(true);
         return;
       }
       try {
@@ -116,6 +118,11 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
 
   return (
     <div className="flex flex-col items-center gap-5 pt-2">
+      <MissingShippingDetailsDialog
+        open={showMissingDetailsDialog}
+        onOpenChange={setShowMissingDetailsDialog}
+      />
+
       {/* Segmented control tabs (Cart checkout vs Custom inquiry) */}
       {isCartCheckout && (
         <div className="flex w-full rounded-lg bg-secondary p-1 text-xs select-none">

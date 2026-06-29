@@ -4,6 +4,7 @@ import { Instagram, MessageCircle, ArrowLeft, ShoppingBag } from "lucide-react";
 
 import { INSTAGRAM_URL, getWhatsAppCartUrl, getWhatsAppCustomOrderUrl } from "@/lib/contact";
 import { Button } from "@/components/ui/button";
+import { MissingShippingDetailsDialog } from "@/components/MissingShippingDetailsDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
@@ -17,6 +18,7 @@ export function CheckoutPage({ onBack }) {
   const [shippingName, setShippingName] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [shippingPincode, setShippingPincode] = useState("");
+  const [showMissingDetailsDialog, setShowMissingDetailsDialog] = useState(false);
 
   const primaryUrl = getWhatsAppCartUrl(cart, shippingRegion);
   const customUrl = getWhatsAppCustomOrderUrl();
@@ -59,7 +61,7 @@ export function CheckoutPage({ onBack }) {
 
   const handleCheckoutClick = async () => {
     if (!shippingName.trim() || !shippingAddress.trim() || !shippingPincode.trim()) {
-      alert("Please enter your name, address, and pincode before checking out.");
+      setShowMissingDetailsDialog(true);
       return;
     }
     try {
@@ -112,6 +114,11 @@ export function CheckoutPage({ onBack }) {
 
   return (
     <div className="min-h-screen bg-background">
+      <MissingShippingDetailsDialog
+        open={showMissingDetailsDialog}
+        onOpenChange={setShowMissingDetailsDialog}
+      />
+
       {/* Top bar */}
       <div className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center gap-3 px-5 py-3">
@@ -216,7 +223,7 @@ export function CheckoutPage({ onBack }) {
                   placeholder="110001"
                   value={shippingPincode}
                   onChange={(e) => setShippingPincode(e.target.value)}
-                  className="w-full text-sm rounded-lg border border-border bg-background px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow max-w-[200px]"
+                  className="w-full text-sm rounded-lg border border-border bg-background px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
                   required
                 />
               </div>
