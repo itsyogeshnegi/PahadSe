@@ -130,6 +130,8 @@ export function AuthDialog({ trigger }) {
       let msg = err.message || "Google Sign-In failed.";
       if (err.code === "auth/configuration-not-found") {
         msg = "Google Sign-In is disabled. Please go to Firebase Console -> Authentication -> Sign-in method, click 'Add new provider', and enable 'Google'.";
+      } else if (err.code === "auth/unauthorized-domain") {
+        msg = "Unauthorized Domain: Please add this website's active domain (e.g. vercel.app or your custom domain) to the 'Authorized domains' list in your Firebase Console under Authentication -> Settings -> Authorized domains.";
       }
       setError(msg);
     } finally {

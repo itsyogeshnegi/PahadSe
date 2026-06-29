@@ -11,6 +11,12 @@
     {
       "src": "/logo.webp",
       "type": "image/webp",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.webp",
+      "type": "image/webp",
       "sizes": "512x512",
       "purpose": "any maskable"
     },

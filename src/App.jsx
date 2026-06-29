@@ -1,5 +1,7 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import {
   ContactSectionFallback,
@@ -42,6 +44,31 @@ function scheduleIdleTask(callback) {
 export default function App() {
   useHomeSeo();
 
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User installed PWA response: ${outcome}`);
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
+
   useEffect(() => {
     return scheduleIdleTask(() => {
       preloadHomeSections();
@@ -82,6 +109,19 @@ export default function App() {
               <LazyFooter />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Floating PWA Download Button on Mobile/Tablet */}
+          {showInstallBtn && (
+            <div className="fixed bottom-6 left-6 z-50 md:hidden">
+              <Button
+                onClick={handleInstallClick}
+                className="h-12 w-12 rounded-full shadow-lg bg-gold hover:bg-gold/90 text-gold-foreground flex items-center justify-center p-0 cursor-pointer animate-pulse border-2 border-background"
+                aria-label="Download App"
+              >
+                <Download className="size-6" />
+              </Button>
+            </div>
+          )}
         </div>
       </CartProvider>
     </AuthProvider>
