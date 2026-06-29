@@ -148,11 +148,11 @@ export function SpinWheelDialog() {
     if (hasWonToday) {
       const luckyDoubleChance = Math.random() < 0.01; // 1% chance to get another reward
       if (luckyDoubleChance) {
-        // Roll normally for prizes
+        // Roll normally for prizes with new probability weights
         const r = Math.random();
-        if (r < 0.15) selectedIndex = 0;
-        else if (r < 0.30) selectedIndex = 1;
-        else if (r < 0.45) selectedIndex = 2;
+        if (r < 0.19) selectedIndex = 0;
+        else if (r < 0.38) selectedIndex = 1;
+        else if (r < 0.41) selectedIndex = 2;
         else if (r < 0.60) selectedIndex = 3;
         else selectedIndex = 4;
       } else {
@@ -161,15 +161,19 @@ export function SpinWheelDialog() {
       }
     } else {
       if (nextSpinCount === 3) {
-        // Guaranteed win on 3rd spin: force selection from prizes 0-3 (25% chance each)
-        selectedIndex = Math.floor(Math.random() * 4);
+        // Guaranteed win on 3rd spin: force selection from prizes 0-3 with weights matching their relative rarities
+        const r = Math.random() * 60;
+        if (r < 19) selectedIndex = 0;
+        else if (r < 38) selectedIndex = 1;
+        else if (r < 41) selectedIndex = 2;
+        else selectedIndex = 3;
       } else {
         const r = Math.random();
-        if (r < 0.15) {
+        if (r < 0.19) {
           selectedIndex = 0;
-        } else if (r < 0.30) {
+        } else if (r < 0.38) {
           selectedIndex = 1;
-        } else if (r < 0.45) {
+        } else if (r < 0.41) {
           selectedIndex = 2;
         } else if (r < 0.60) {
           selectedIndex = 3;
