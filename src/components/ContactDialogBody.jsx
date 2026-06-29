@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, setDoc } from "firebase/firestore";
 
 export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItems = [] }) {
   const customUrl = getWhatsAppCustomOrderUrl();
@@ -16,6 +16,10 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
 
+  const [shippingName, setShippingName] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingPincode, setShippingPincode] = useState("");
+
   useEffect(() => {
     if (!user) return;
     const fetchProfile = async () => {
@@ -23,10 +27,14 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
         const docRef = doc(db, "user_detail", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProfile(docSnap.data());
+          const data = docSnap.data();
+          setProfile(data);
+          if (data.name) setShippingName(data.name);
+          if (data.address) setShippingAddress(data.address);
+          if (data.pincode) setShippingPincode(String(data.pincode));
         }
       } catch (err) {
-        console.error("Failed to load profile inside ContactDialogBody", err);
+        console.error("Failed to load user profile", err);
       }
     };
     fetchProfile();
@@ -34,8 +42,13 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
 
   const handleCheckoutClick = async () => {
     if (currentMode === "cart") {
+      if (!shippingName.trim() || !shippingAddress.trim() || !shippingPincode.trim()) {
+        alert("Please enter your name, address, and pincode before checking out.");
+        return;
+      }
       try {
         if (user) {
+          // Log to order history
           await addDoc(collection(db, "order_history"), {
             userId: user.uid,
             items: cartItems.map((item) => ({
@@ -47,12 +60,30 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
             deliveryCharge: Number(deliveryCharge),
             total: Number(shippingRegion === "delhi_ncr" ? total : subtotal),
             shippingRegion,
+            shippingDetails: {
+              name: shippingName,
+              address: shippingAddress,
+              pincode: shippingPincode,
+            },
             createdAt: new Date().toISOString(),
             status: "Sent via WhatsApp",
           });
+
+          // Update user details
+          const docRef = doc(db, "user_detail", user.uid);
+          await setDoc(
+            docRef,
+            {
+              name: shippingName,
+              address: shippingAddress,
+              pincode: parseInt(shippingPincode, 10) || 0,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
         }
       } catch (err) {
-        console.error("Failed to log order to Firestore", err);
+        console.error("Failed to log order or update profile", err);
       }
     }
     window.open(finalUrl, "_blank", "noopener,noreferrer");
@@ -61,8 +92,8 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
   const activeUrl = currentMode === "cart" ? primaryUrl : customUrl;
 
   let finalUrl = activeUrl;
-  if (currentMode === "cart" && profile) {
-    const extraText = `\n\n*Shipping Details:*\n- Name: ${profile.name || user.displayName || ""}\n- Phone: ${profile.phone || ""}\n- Address: ${profile.address || ""}\n- Pincode: ${profile.pincode || ""}`;
+  if (currentMode === "cart" && (shippingName || shippingAddress || shippingPincode)) {
+    const extraText = `\n\n*Shipping Details:*\n- Name: ${shippingName}\n- Address: ${shippingAddress}\n- Pincode: ${shippingPincode}`;
     try {
       const parsedUrl = new URL(activeUrl);
       const textParam = parsedUrl.searchParams.get("text");
@@ -141,6 +172,58 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
                   ? `Rs. ${total}`
                   : `Rs. ${subtotal} + Shipping`}
               </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shipping details input fields form */}
+      {currentMode === "cart" && (
+        <div className="w-full space-y-2 border border-border/60 bg-card rounded-xl p-3 text-left">
+          <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            Shipping Address
+          </div>
+          
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+              Full Name
+            </label>
+            <input
+              type="text"
+              placeholder="Enter recipient name"
+              value={shippingName}
+              onChange={(e) => setShippingName(e.target.value)}
+              className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2 space-y-1">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                Delivery Address
+              </label>
+              <input
+                type="text"
+                placeholder="Street, City, State"
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                Pincode
+              </label>
+              <input
+                type="text"
+                placeholder="110001"
+                value={shippingPincode}
+                onChange={(e) => setShippingPincode(e.target.value)}
+                className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                required
+              />
             </div>
           </div>
         </div>

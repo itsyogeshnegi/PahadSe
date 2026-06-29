@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SpinWheelDialog } from "@/components/SpinWheelDialog";
 
 import {
   ContactSectionFallback,
@@ -122,6 +123,9 @@ export default function App() {
               </Button>
             </div>
           )}
+
+          {/* Floating PWA Spin the Wheel game widget */}
+          <SpinWheelDialog />
         </div>
       </CartProvider>
     </AuthProvider>

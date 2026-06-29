@@ -78,126 +78,132 @@ export function Header() {
             <Instagram className="size-6" />
           </a>
 
-          {/* Shopping Cart Drawer */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`Shopping Cart, ${cartCount} items`}
-                className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
-              >
-                <ShoppingBag className="size-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground select-none animate-in zoom-in duration-200">
-                    {cartCount}
-                  </span>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="flex h-full w-full flex-col sm:max-w-md bg-background border-l border-border/60 p-6">
-              <SheetHeader className="pb-6 border-b border-border/50 text-left">
-                <SheetTitle className="text-2xl font-display text-primary flex items-center gap-2">
-                  <ShoppingBag className="size-6 text-primary" /> Your Cart
-                </SheetTitle>
-                <SheetDescription>Verify your Himalayan spices before checkout.</SheetDescription>
-              </SheetHeader>
+          {/* Shopping Cart Drawer Gated by Login */}
+          {!user ? (
+            <AuthDialog
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Shopping Cart"
+                  className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
+                >
+                  <ShoppingBag className="size-6" />
+                </Button>
+              }
+            />
+          ) : (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Shopping Cart, ${cartCount} items`}
+                  className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
+                >
+                  <ShoppingBag className="size-6" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground select-none animate-in zoom-in duration-200">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="flex h-full w-full flex-col sm:max-w-md bg-background border-l border-border/60 p-6">
+                <SheetHeader className="pb-6 border-b border-border/50 text-left">
+                  <SheetTitle className="text-2xl font-display text-primary flex items-center gap-2">
+                    <ShoppingBag className="size-6 text-primary" /> Your Cart
+                  </SheetTitle>
+                  <SheetDescription>Verify your Himalayan spices before checkout.</SheetDescription>
+                </SheetHeader>
 
-              {/* Items Container */}
-              <div className="flex-1 overflow-y-auto py-6 space-y-4">
-                {cart.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-3">
-                    <ShoppingBag className="size-16 text-muted-foreground/30" />
-                    <p className="text-lg font-medium text-foreground">Your cart is empty</p>
-                    <p className="text-sm text-muted-foreground">
-                      Add some natural Uttarakhand flavors to start!
-                    </p>
-                    <SheetClose asChild>
-                      <Button className="mt-2 cursor-pointer" variant="outline">
-                        Browse Products
-                      </Button>
-                    </SheetClose>
-                  </div>
-                ) : (
-                  cart.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-card/50 shadow-[var(--shadow-soft)]/5"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-16 w-16 rounded-xl object-cover border border-border/50 bg-secondary/20"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground truncate text-sm">
-                          {item.name}
-                        </h4>
-                        <p className="text-sm font-medium text-muted-foreground mt-0.5">
-                          {item.id === "red-namak" ? (
-                            <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 80</span>
-                          ) : item.id === "green-namak" ? (
-                            <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 70</span>
-                          ) : null}
-                          Rs. {item.price}
-                        </p>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center rounded-md border border-border bg-background p-0.5 shadow-sm">
+                {/* Items Container */}
+                <div className="flex-1 overflow-y-auto py-6 space-y-4">
+                  {cart.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-3">
+                      <ShoppingBag className="size-16 text-muted-foreground/30" />
+                      <p className="text-lg font-medium text-foreground">Your cart is empty</p>
+                      <p className="text-sm text-muted-foreground">
+                        Add some natural Uttarakhand flavors to start!
+                      </p>
+                      <SheetClose asChild>
+                        <Button className="mt-2 cursor-pointer" variant="outline">
+                          Browse Products
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  ) : (
+                    cart.map((item) => (
+                      <div key={item.id} className="flex items-center gap-4 py-3 border-b border-border/40 last:border-0">
+                        <div className="size-16 rounded-xl overflow-hidden bg-secondary/30 flex-shrink-0">
+                          <img src={item.image} alt={item.name} className="size-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate text-sm">
+                            {item.name}
+                          </h4>
+                          <p className="text-sm font-medium text-muted-foreground mt-0.5">
+                            {item.id === "red-namak" ? (
+                              <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 80</span>
+                            ) : item.id === "green-namak" ? (
+                              <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 70</span>
+                            ) : null}
+                            Rs. {item.price}
+                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center border border-border/60 rounded-lg p-0.5 bg-secondary/20">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="size-6 rounded-md hover:bg-secondary cursor-pointer"
+                              >
+                                <Minus className="size-3" />
+                              </Button>
+                              <span className="px-3 text-xs font-semibold text-foreground min-w-[20px] text-center select-none font-sans">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="size-6 rounded-md hover:bg-secondary cursor-pointer"
+                              >
+                                <Plus className="size-3" />
+                              </Button>
+                            </div>
                             <Button
                               variant="ghost"
-                              size="icon"
-                              aria-label={`Decrease quantity of ${item.name}`}
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="h-7 w-7 rounded cursor-pointer select-none text-muted-foreground hover:text-foreground"
+                              size="sm"
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-2 cursor-pointer rounded-lg font-semibold"
                             >
-                              <Minus className="size-3.5" />
-                            </Button>
-                            <span className="w-6 text-center text-xs font-semibold select-none">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Increase quantity of ${item.name}`}
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="h-7 w-7 rounded cursor-pointer select-none text-muted-foreground hover:text-foreground"
-                            >
-                              <Plus className="size-3.5" />
+                              Remove
                             </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-label={`Remove ${item.name} from cart`}
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded px-2 py-1 cursor-pointer"
-                          >
-                            Remove
-                          </Button>
                         </div>
                       </div>
+                    ))
+                  )}
+                  {cart.length > 0 && freePacketsCount > 0 && (
+                    <div className="flex gap-4 p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5 shadow-inner mt-4">
+                      <div className="h-16 w-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl select-none">
+                        🎁
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h4 className="font-semibold text-primary text-sm flex items-center gap-1.5">
+                          Free Gift Packs
+                          <span className="text-[9px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-sans uppercase font-bold tracking-wide">
+                            Free
+                          </span>
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          2x Organic Pahadi Spices added automatically
+                        </p>
+                        <p className="text-xs font-semibold text-primary mt-1">Rs. 0</p>
+                      </div>
                     </div>
-                  ))
-                )}
-                {cart.length > 0 && freePacketsCount > 0 && (
-                  <div className="flex gap-4 p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5 shadow-inner">
-                    <div className="h-16 w-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl select-none">
-                      🎁
-                    </div>
-                    <div className="flex-1 min-w-0 text-left">
-                      <h4 className="font-semibold text-primary text-sm flex items-center gap-1.5">
-                        Free Gift Packs
-                        <span className="text-[9px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-sans uppercase font-bold tracking-wide">
-                          Free
-                        </span>
-                      </h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        2x Organic Pahadi Spices added automatically
-                      </p>
-                      <p className="text-xs font-semibold text-primary mt-1">Rs. 0</p>
-                    </div>
-                  </div>
-                )}
+                  )}
               </div>
 
               {/* Region Selector */}
@@ -261,6 +267,7 @@ export function Header() {
               )}
             </SheetContent>
           </Sheet>
+          )}
 
           {user ? (
             <DropdownMenu>
