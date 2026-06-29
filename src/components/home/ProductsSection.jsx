@@ -2,12 +2,15 @@ import { MessageCircle, Minus, Plus, ShoppingBag } from "lucide-react";
 import { motion } from "motion/react";
 
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthDialog } from "@/components/AuthDialog";
 import { flavours } from "@/components/home/home-data";
 import { fadeUp } from "@/components/home/home-motion";
 import { Button } from "@/components/ui/button";
 
 export function ProductsSection() {
   const { cart, addToCart, updateQuantity } = useCart();
+  const { user } = useAuth();
 
   return (
     <section id="products" className="mx-auto max-w-6xl px-5 py-20">
@@ -47,17 +50,23 @@ export function ProductsSection() {
                   ))}
                 </div>
                 <h3 className={`text-3xl ${flavour.accent}`}>{flavour.name}</h3>
-                <div className="mt-1 text-xl font-bold text-foreground">
-                  Rs. {flavour.price}
+                <div className="mt-1 text-xl font-bold text-foreground flex items-baseline">
+                  {flavour.mrp && (
+                    <span className="line-through text-muted-foreground/60 mr-2 text-sm font-normal">
+                      Rs. {flavour.mrp}
+                    </span>
+                  )}
+                  <span>Rs. {flavour.price}</span>
                 </div>
                 <p className="mt-3 text-muted-foreground">{flavour.desc}</p>
                 <div className="mt-6">
-                  {cartItem ? (
+                  {user && cartItem ? (
                     <div className="flex items-center gap-4">
                       <div className="flex items-center rounded-lg border border-border bg-background p-1 shadow-sm">
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Decrease quantity of ${flavour.name}`}
                           onClick={() => updateQuantity(flavour.id, cartItem.quantity - 1)}
                           className="h-8 w-8 rounded-md cursor-pointer select-none text-muted-foreground hover:text-foreground"
                         >
@@ -69,6 +78,7 @@ export function ProductsSection() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Increase quantity of ${flavour.name}`}
                           onClick={() => updateQuantity(flavour.id, cartItem.quantity + 1)}
                           className="h-8 w-8 rounded-md cursor-pointer select-none text-muted-foreground hover:text-foreground"
                         >
@@ -77,10 +87,20 @@ export function ProductsSection() {
                       </div>
                       <span className="text-xs text-muted-foreground font-medium">In your cart</span>
                     </div>
+                  ) : !user ? (
+                    <AuthDialog
+                      trigger={
+                        <Button
+                          className="gap-2 cursor-pointer select-none font-semibold shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 w-full"
+                        >
+                          <ShoppingBag className="size-4" /> Add to Cart
+                        </Button>
+                      }
+                    />
                   ) : (
                     <Button
                       onClick={() => addToCart(flavour)}
-                      className="gap-2 cursor-pointer select-none font-semibold shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                      className="gap-2 cursor-pointer select-none font-semibold shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 w-full"
                     >
                       <ShoppingBag className="size-4" /> Add to Cart
                     </Button>

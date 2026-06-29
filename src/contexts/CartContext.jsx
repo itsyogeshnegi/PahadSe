@@ -1,10 +1,17 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import { DELIVERY_CHARGE_DELHI } from "@/lib/contact";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { flavours } from "@/components/home/home-data";
 
 const CartContext = createContext(undefined);
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const [cart, setCart] = useState(() => {
     if (typeof window !== "undefined") {
       try {
@@ -29,6 +36,68 @@ export function CartProvider({ children }) {
     }
     return "delhi_ncr";
   });
+
+  // Sync cart from Firestore database when user changes
+  useEffect(() => {
+    async function loadUserCart() {
+      if (!user) return;
+      setIsSyncing(true);
+      try {
+        const cartDocRef = doc(db, "cart", user.uid);
+        const docSnap = await getDoc(cartDocRef);
+        if (docSnap.exists()) {
+          const dbItems = docSnap.data().items || [];
+          setCart((prevCart) => {
+            const merged = [...prevCart];
+            dbItems.forEach((dbItem) => {
+              const flavour = flavours.find((f) => f.name === dbItem.item_name || f.id === dbItem.id);
+              const itemId = flavour?.id || dbItem.id || dbItem.item_name;
+              const itemPrice = flavour?.price || 0;
+              const itemQuantity = Number(dbItem.count || dbItem.quantity || 1);
+
+              const existing = merged.find((item) => item.id === itemId);
+              if (existing) {
+                existing.quantity = Math.max(existing.quantity, itemQuantity);
+              } else {
+                merged.push({
+                  id: itemId,
+                  name: dbItem.item_name || dbItem.name || itemId,
+                  price: itemPrice,
+                  quantity: itemQuantity,
+                });
+              }
+            });
+            return merged;
+          });
+        }
+      } catch (e) {
+        console.error("Failed to sync cart from Firestore", e);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+    loadUserCart();
+  }, [user]);
+
+  // Sync cart to Firestore database when cart changes
+  useEffect(() => {
+    if (isSyncing || !user) return;
+    const saveCartToDb = async () => {
+      try {
+        const cartDocRef = doc(db, "cart", user.uid);
+        const firestoreItems = cart.map((item) => ({
+          id: item.id,
+          item_name: item.name,
+          count: Number(item.quantity),
+        }));
+        await setDoc(cartDocRef, { items: firestoreItems, updatedAt: new Date().toISOString() });
+      } catch (e) {
+        console.error("Failed to save cart to Firestore", e);
+      }
+    };
+    const timer = setTimeout(saveCartToDb, 500);
+    return () => clearTimeout(timer);
+  }, [cart, user, isSyncing]);
 
   useEffect(() => {
     try {
@@ -85,23 +154,34 @@ export function CartProvider({ children }) {
   const total = subtotal + deliveryCharge;
   const freePacketsCount = subtotal >= 399 ? 2 : 0;
 
+  const contextValue = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartCount,
+      subtotal,
+      deliveryCharge,
+      total,
+      shippingRegion,
+      setShippingRegion,
+      freePacketsCount,
+    }),
+    [
+      cart,
+      cartCount,
+      subtotal,
+      deliveryCharge,
+      total,
+      shippingRegion,
+      freePacketsCount,
+    ]
+  );
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartCount,
-        subtotal,
-        deliveryCharge,
-        total,
-        shippingRegion,
-        setShippingRegion,
-        freePacketsCount,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

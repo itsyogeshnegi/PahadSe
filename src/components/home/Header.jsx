@@ -1,10 +1,22 @@
-import { Instagram, MessageCircle, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Instagram, MessageCircle, Minus, Plus, ShoppingBag, LogOut, LogIn, User } from "lucide-react";
 
 import logo from "@/assets/images/pahad-se-logo.webp";
 import { ContactDialog } from "@/components/ContactDialog";
 import { Button } from "@/components/ui/button";
 import { INSTAGRAM_URL } from "@/lib/contact";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthDialog } from "@/components/AuthDialog";
+import { UserProfileDialog } from "@/components/UserProfileDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetClose,
@@ -27,7 +39,18 @@ export function Header() {
     shippingRegion,
     setShippingRegion,
     freePacketsCount,
+    clearCart,
   } = useCart();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearCart();
+    } catch (e) {
+      console.error("Failed to log out", e);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -61,6 +84,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={`Shopping Cart, ${cartCount} items`}
                 className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
               >
                 <ShoppingBag className="size-6" />
@@ -110,6 +134,11 @@ export function Header() {
                           {item.name}
                         </h4>
                         <p className="text-sm font-medium text-muted-foreground mt-0.5">
+                          {item.id === "red-namak" ? (
+                            <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 80</span>
+                          ) : item.id === "green-namak" ? (
+                            <span className="line-through text-muted-foreground/60 mr-1.5 text-xs font-normal">Rs. 70</span>
+                          ) : null}
                           Rs. {item.price}
                         </p>
                         <div className="flex items-center justify-between mt-2">
@@ -117,6 +146,7 @@ export function Header() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label={`Decrease quantity of ${item.name}`}
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="h-7 w-7 rounded cursor-pointer select-none text-muted-foreground hover:text-foreground"
                             >
@@ -128,6 +158,7 @@ export function Header() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label={`Increase quantity of ${item.name}`}
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="h-7 w-7 rounded cursor-pointer select-none text-muted-foreground hover:text-foreground"
                             >
@@ -137,6 +168,7 @@ export function Header() {
                           <Button
                             variant="ghost"
                             size="sm"
+                            aria-label={`Remove ${item.name} from cart`}
                             onClick={() => removeFromCart(item.id)}
                             className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded px-2 py-1 cursor-pointer"
                           >
@@ -230,9 +262,45 @@ export function Header() {
             </SheetContent>
           </Sheet>
 
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 cursor-pointer select-none">
+                  <Avatar className="h-10 w-10 border border-border/80">
+                    {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || "User Profile"} />}
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                      {(user.displayName || user.email || "U").substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-background border border-border/80 rounded-xl p-1 shadow-md" align="end">
+                <DropdownMenuLabel className="font-semibold text-foreground text-xs px-2.5 py-2 text-left">
+                  <div className="font-bold truncate">{user.displayName || "Pahadi Lover"}</div>
+                  <div className="text-[10px] text-muted-foreground truncate font-sans mt-0.5">{user.email}</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/60 my-1" />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg px-2.5 py-2 cursor-pointer text-xs font-semibold flex items-center gap-2 select-none"
+                >
+                  <LogOut className="size-4" /> Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <AuthDialog
+              trigger={
+                <Button variant="outline" size="sm" className="gap-2 cursor-pointer font-semibold shadow-sm text-xs h-9">
+                  <LogIn className="size-4" /> Sign In
+                </Button>
+              }
+            />
+          )}
+
           <ContactDialog
             trigger={
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2 h-9">
                 <MessageCircle className="size-7" /> Order
               </Button>
             }

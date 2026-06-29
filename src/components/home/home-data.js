@@ -6,8 +6,9 @@ import hariMirch from "@/assets/images/green-chilli.webp";
 export const flavours = [
   {
     id: "red-namak",
-    name: "Garlic with Red Chilli",
+    name: "Classic Loon",
     price: 69,
+    mrp: 80,
     tags: ["Spicy", "Tangy", "Flavorful"],
     image: garlicChilli,
     desc: "A warm, smoky blend of sun-dried red chilli and pahadi garlic - a little sprinkle wakes up everything from dal to dosa.",
@@ -15,8 +16,9 @@ export const flavours = [
   },
   {
     id: "green-namak",
-    name: "Hari Mirch & Jeera",
+    name: "Hing Jera Loon",
     price: 59,
+    mrp: 70,
     tags: ["Fresh", "Zesty", "Aromatic"],
     image: hariMirch,
     desc: "Bright green chilli folded with toasted cumin - fresh, fragrant, and gently fiery, the way the hills make it.",

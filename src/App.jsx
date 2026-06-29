@@ -22,6 +22,8 @@ import {
 import { useHomeSeo } from "@/components/home/use-home-seo";
 import { preloadContactDialog } from "@/components/ContactDialog";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function scheduleIdleTask(callback) {
   if (typeof window === "undefined") {
@@ -48,28 +50,40 @@ export default function App() {
   }, []);
 
   return (
-    <CartProvider>
-      <Analytics />
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <HeroSection />
-        <PromisesSection />
-        <Suspense fallback={<ProductsSectionFallback />}>
-          <LazyProductsSection />
-        </Suspense>
-        <Suspense fallback={<StorySectionFallback />}>
-          <LazyStorySection />
-        </Suspense>
-        <Suspense fallback={<TestimonialsSectionFallback />}>
-          <LazyTestimonialsSection />
-        </Suspense>
-        <Suspense fallback={<ContactSectionFallback />}>
-          <LazyContactSection />
-        </Suspense>
-        <Suspense fallback={<FooterFallback />}>
-          <LazyFooter />
-        </Suspense>
-      </div>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Analytics />
+        <div className="min-h-screen bg-background text-foreground">
+          <Header />
+          <HeroSection />
+          <PromisesSection />
+          <ErrorBoundary>
+            <Suspense fallback={<ProductsSectionFallback />}>
+              <LazyProductsSection />
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Suspense fallback={<StorySectionFallback />}>
+              <LazyStorySection />
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Suspense fallback={<TestimonialsSectionFallback />}>
+              <LazyTestimonialsSection />
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Suspense fallback={<ContactSectionFallback />}>
+              <LazyContactSection />
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Suspense fallback={<FooterFallback />}>
+              <LazyFooter />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </CartProvider>
+    </AuthProvider>
   );
 }

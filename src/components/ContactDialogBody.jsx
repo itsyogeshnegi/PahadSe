@@ -1,17 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Instagram, MessageCircle } from "lucide-react";
 
 import { INSTAGRAM_URL, getWhatsAppCustomOrderUrl } from "@/lib/contact";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, collection, addDoc } from "firebase/firestore";
 
 export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItems = [] }) {
   const customUrl = getWhatsAppCustomOrderUrl();
   const [currentMode, setCurrentMode] = useState(isCartCheckout ? "cart" : "custom");
   const { subtotal, deliveryCharge, total, shippingRegion, freePacketsCount } = useCart();
+  const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchProfile = async () => {
+      try {
+        const docRef = doc(db, "user_detail", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProfile(docSnap.data());
+        }
+      } catch (err) {
+        console.error("Failed to load profile inside ContactDialogBody", err);
+      }
+    };
+    fetchProfile();
+  }, [user]);
+
+  const handleCheckoutClick = async () => {
+    if (currentMode === "cart") {
+      try {
+        if (user) {
+          await addDoc(collection(db, "order_history"), {
+            userId: user.uid,
+            items: cartItems.map((item) => ({
+              Item: item.name,
+              count: Number(item.quantity),
+              price: Number(item.price),
+            })),
+            subtotal: Number(subtotal),
+            deliveryCharge: Number(deliveryCharge),
+            total: Number(shippingRegion === "delhi_ncr" ? total : subtotal),
+            shippingRegion,
+            createdAt: new Date().toISOString(),
+            status: "Sent via WhatsApp",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to log order to Firestore", err);
+      }
+    }
+    window.open(finalUrl, "_blank", "noopener,noreferrer");
+  };
 
   const activeUrl = currentMode === "cart" ? primaryUrl : customUrl;
+
+  let finalUrl = activeUrl;
+  if (currentMode === "cart" && profile) {
+    const extraText = `\n\n*Shipping Details:*\n- Name: ${profile.name || user.displayName || ""}\n- Phone: ${profile.phone || ""}\n- Address: ${profile.address || ""}\n- Pincode: ${profile.pincode || ""}`;
+    try {
+      const parsedUrl = new URL(activeUrl);
+      const textParam = parsedUrl.searchParams.get("text");
+      if (textParam) {
+        parsedUrl.searchParams.set("text", textParam + extraText);
+        finalUrl = parsedUrl.toString();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center gap-5 pt-2">
@@ -87,7 +149,7 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
       {/* QR Code Container */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] transition-all duration-300">
         <QRCodeSVG
-          value={activeUrl}
+          value={finalUrl}
           size={180}
           bgColor="transparent"
           fgColor="#2d4a36"
@@ -103,11 +165,9 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
 
       {/* Action Buttons */}
       <div className="flex w-full flex-col gap-3">
-        <Button asChild size="lg" className="w-full cursor-pointer">
-          <a href={activeUrl} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="size-5" />
-            {currentMode === "cart" ? "Checkout on WhatsApp" : "Talk Custom Order"}
-          </a>
+        <Button size="lg" className="w-full cursor-pointer gap-2" onClick={handleCheckoutClick}>
+          <MessageCircle className="size-5" />
+          {currentMode === "cart" ? "Checkout on WhatsApp" : "Talk Custom Order"}
         </Button>
 
         {/* Dynamic toggle link if not launched from a cart checkout */}
