@@ -18,6 +18,7 @@ export function SpinWheelDialog() {
   const [lastSpinDate, setLastSpinDate] = useState("");
   const [spinsCountToday, setSpinsCountToday] = useState(0);
   const [hasWonToday, setHasWonToday] = useState(false);
+  const [couponRedeemed, setCouponRedeemed] = useState(false);
   const [copied, setCopied] = useState(false);
   
   const canvasRef = useRef(null);
@@ -59,6 +60,10 @@ export function SpinWheelDialog() {
       setSpinsCountToday(spinsCount);
       setHasWonToday(won);
       setPrize(savedPrize);
+
+      // Check if coupon was already redeemed today
+      const redeemedDate = localStorage.getItem("pahadse_coupon_redeemed_date");
+      setCouponRedeemed(redeemedDate === todayString);
     }
   }, [open]);
 
@@ -318,7 +323,7 @@ export function SpinWheelDialog() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isOutOfSpins = spinsCountToday >= 3;
+  const isOutOfSpins = spinsCountToday >= 3 || couponRedeemed;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -379,7 +384,7 @@ export function SpinWheelDialog() {
               </span>
               <p className="text-lg font-bold text-primary font-display">{prize.text}</p>
               
-              {prize.code ? (
+              {prize.code && !couponRedeemed ? (
                 <>
                   <div className="flex items-center gap-2 mt-3 bg-background border border-border/80 rounded-lg p-2 max-w-[240px] mx-auto">
                     <span className="text-sm font-mono font-bold text-foreground flex-1 select-all">
@@ -404,6 +409,10 @@ export function SpinWheelDialog() {
                     </span>
                   )}
                 </>
+              ) : prize.code && couponRedeemed ? (
+                <p className="text-xs text-primary font-semibold mt-1">
+                  ✅ Coupon already redeemed today! Come back tomorrow for a new spin.
+                </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-1">
                   {isOutOfSpins 
@@ -412,7 +421,7 @@ export function SpinWheelDialog() {
                   }
                 </p>
               )}
-              {prize.code && (
+              {prize.code && !couponRedeemed && (
                 <span className="text-[10px] text-muted-foreground block mt-1.5 leading-tight">
                   Copy code and paste it on WhatsApp checkout to redeem.
                 </span>
@@ -433,9 +442,11 @@ export function SpinWheelDialog() {
             >
               {spinning 
                 ? "Spinning..." 
-                : isOutOfSpins 
-                  ? "Already Spun 3 Times Today" 
-                  : `Spin Now (${3 - spinsCountToday} Left)`
+                : couponRedeemed
+                  ? "Coupon Redeemed Today"
+                  : isOutOfSpins 
+                    ? "Already Spun 3 Times Today" 
+                    : `Spin Now (${3 - spinsCountToday} Left)`
               }
             </Button>
             

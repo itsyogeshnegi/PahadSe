@@ -63,7 +63,7 @@ export function ContactDialog({ trigger, productName, cartCheckout = false }) {
   return (
     <Dialog>
       <DialogTrigger asChild>{preparedTrigger}</DialogTrigger>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl text-primary">Order on WhatsApp</DialogTitle>
         </DialogHeader>

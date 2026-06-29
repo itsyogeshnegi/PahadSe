@@ -27,7 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-export function Header() {
+export function Header({ onCheckout }) {
   const {
     cart,
     cartCount,
@@ -88,7 +88,7 @@ export function Header() {
                   aria-label="Shopping Cart"
                   className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
                 >
-                  <ShoppingBag className="size-6" />
+                  <ShoppingBag className="size-8" />
                 </Button>
               }
             />
@@ -101,7 +101,7 @@ export function Header() {
                   aria-label={`Shopping Cart, ${cartCount} items`}
                   className="relative cursor-pointer h-10 w-10 text-primary hover:bg-secondary rounded-full"
                 >
-                  <ShoppingBag className="size-6" />
+                  <ShoppingBag className="size-8" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground select-none animate-in zoom-in duration-200">
                       {cartCount}
@@ -252,17 +252,15 @@ export function Header() {
                       </span>
                     </div>
                   </div>
-                  <ContactDialog
-                    cartCheckout={true}
-                    trigger={
-                      <Button
-                        size="lg"
-                        className="w-full gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-transform duration-200"
-                      >
-                        <MessageCircle className="size-5" /> Checkout on WhatsApp
-                      </Button>
-                    }
-                  />
+                  <SheetClose asChild>
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-transform duration-200"
+                      onClick={() => onCheckout?.()}
+                    >
+                      <MessageCircle className="size-5" /> Checkout on WhatsApp
+                    </Button>
+                  </SheetClose>
                 </div>
               )}
             </SheetContent>

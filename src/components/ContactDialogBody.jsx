@@ -86,6 +86,14 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
         console.error("Failed to log order or update profile", err);
       }
     }
+
+    // Mark spin coupon as redeemed for today after checkout
+    const savedPrize = localStorage.getItem("pahadse_last_spin_prize");
+    if (savedPrize && currentMode === "cart") {
+      localStorage.setItem("pahadse_coupon_redeemed_date", new Date().toDateString());
+      localStorage.removeItem("pahadse_last_spin_prize");
+    }
+
     window.open(finalUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -134,142 +142,164 @@ export function ContactDialogBody({ primaryUrl, isCartCheckout = false, cartItem
         </div>
       )}
 
-      {/* Cart Summary displayed in Dialog */}
-      {currentMode === "cart" && cartItems.length > 0 && (
-        <div className="w-full text-xs text-muted-foreground bg-secondary/40 rounded-xl p-3 border border-border/40 max-h-[140px] overflow-y-auto space-y-1 text-left">
-          <div className="font-semibold text-foreground mb-1">Order Summary:</div>
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between">
-              <span>
-                {item.name} x {item.quantity}
-              </span>
-              <span>Rs. {item.price * item.quantity}</span>
-            </div>
-          ))}
-          {freePacketsCount > 0 && (
-            <div className="flex justify-between text-primary font-medium">
-              <span>🎁 Gift Spices Packets x 2</span>
-              <span>Rs. 0</span>
+      {/* Responsive two-column layout on desktop, single column on mobile */}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {/* LEFT COLUMN: Order Summary + Shipping Form + Notice */}
+        <div className="flex flex-col gap-4">
+          {/* Cart Summary */}
+          {currentMode === "cart" && cartItems.length > 0 && (
+            <div className="w-full text-xs text-muted-foreground bg-secondary/40 rounded-xl p-3 border border-border/40 max-h-[180px] overflow-y-auto space-y-1 text-left">
+              <div className="font-semibold text-foreground mb-1">Order Summary:</div>
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between">
+                  <span>
+                    {item.name} x {item.quantity}
+                  </span>
+                  <span>Rs. {item.price * item.quantity}</span>
+                </div>
+              ))}
+              {freePacketsCount > 0 && (
+                <div className="flex justify-between text-primary font-medium">
+                  <span>🎁 Gift Spices Packets x 2</span>
+                  <span>Rs. 0</span>
+                </div>
+              )}
+              <div className="border-t border-border/60 mt-1.5 pt-1.5 space-y-0.5 font-sans">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rs. {subtotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping ({shippingRegion === "delhi_ncr" ? "Delhi NCR" : "Other State"})</span>
+                  <span>
+                    {shippingRegion === "delhi_ncr"
+                      ? (deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge}`)
+                      : "Talk on WhatsApp"}
+                  </span>
+                </div>
+                <div className="flex justify-between font-semibold text-foreground border-t border-border/40 mt-1 pt-1">
+                  <span>Total</span>
+                  <span>
+                    {shippingRegion === "delhi_ncr"
+                      ? `Rs. ${total}`
+                      : `Rs. ${subtotal} + Shipping`}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
-          <div className="border-t border-border/60 mt-1.5 pt-1.5 space-y-0.5 font-sans">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>Rs. {subtotal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping ({shippingRegion === "delhi_ncr" ? "Delhi NCR" : "Other State"})</span>
-              <span>
-                {shippingRegion === "delhi_ncr"
-                  ? (deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge}`)
-                  : "Talk on WhatsApp"}
-              </span>
-            </div>
-            <div className="flex justify-between font-semibold text-foreground border-t border-border/40 mt-1 pt-1">
-              <span>Total</span>
-              <span>
-                {shippingRegion === "delhi_ncr"
-                  ? `Rs. ${total}`
-                  : `Rs. ${subtotal} + Shipping`}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Shipping details input fields form */}
-      {currentMode === "cart" && (
-        <div className="w-full space-y-2 border border-border/60 bg-card rounded-xl p-3 text-left">
-          <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
-            Shipping Address
-          </div>
-          
-          <div className="space-y-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">
-              Full Name
-            </label>
-            <input
-              type="text"
-              placeholder="Enter recipient name"
-              value={shippingName}
-              onChange={(e) => setShippingName(e.target.value)}
-              className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-              required
+          {/* Shipping details input fields form */}
+          {currentMode === "cart" && (
+            <div className="w-full space-y-2 border border-border/60 bg-card rounded-xl p-3 text-left">
+              <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                Shipping Address
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter recipient name"
+                  value={shippingName}
+                  onChange={(e) => setShippingName(e.target.value)}
+                  className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    Delivery Address
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Street, City, State"
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="110001"
+                    value={shippingPincode}
+                    onChange={(e) => setShippingPincode(e.target.value)}
+                    className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Prepaid order and email confirmation notice */}
+          {currentMode === "cart" && (
+            <div className="w-full flex gap-2.5 rounded-xl bg-primary/5 border border-primary/20 p-3 text-left animate-in fade-in">
+              <span className="text-base select-none mt-0.5">💳</span>
+              <div className="text-[11px] text-muted-foreground leading-normal font-sans">
+                <span className="font-bold text-primary block mb-0.5 uppercase tracking-wide text-[10px]">
+                  Prepaid Orders & Email Confirmation
+                </span>
+                All orders are prepaid. We will send you a confirmation email once your payment and order details are verified.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: QR Code + Actions */}
+        <div className="flex flex-col items-center gap-4">
+          {/* QR Code Container */}
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] transition-all duration-300">
+            <QRCodeSVG
+              value={finalUrl}
+              size={180}
+              bgColor="transparent"
+              fgColor="#2d4a36"
+              level="M"
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-2 space-y-1">
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase">
-                Delivery Address
-              </label>
-              <input
-                type="text"
-                placeholder="Street, City, State"
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase">
-                Pincode
-              </label>
-              <input
-                type="text"
-                placeholder="110001"
-                value={shippingPincode}
-                onChange={(e) => setShippingPincode(e.target.value)}
-                className="w-full text-xs rounded border border-border bg-background px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                required
-              />
-            </div>
+          <p className="text-center text-sm text-muted-foreground px-2">
+            {currentMode === "cart"
+              ? "Scan the code, or tap below to send your cart details to WhatsApp."
+              : "Scan the code, or tap below to discuss a custom order on WhatsApp."}
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex w-full flex-col gap-3">
+            <Button size="lg" className="w-full cursor-pointer gap-2" onClick={handleCheckoutClick}>
+              <MessageCircle className="size-5" />
+              {currentMode === "cart" ? "Checkout on WhatsApp" : "Talk Custom Order"}
+            </Button>
+
+            {/* Dynamic toggle link if not launched from a cart checkout */}
+            {!isCartCheckout && cartItems.length > 0 && (
+              <button
+                onClick={() => setCurrentMode((prev) => (prev === "cart" ? "custom" : "cart"))}
+                className="text-xs text-primary font-medium hover:underline cursor-pointer py-1 self-center"
+              >
+                {currentMode === "custom"
+                  ? "Have items in cart? Checkout cart instead"
+                  : "Need a custom order? Chat with us here"}
+              </button>
+            )}
+
+            <Button asChild variant="outline" size="lg" className="w-full cursor-pointer">
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                <Instagram className="size-5" /> @pahadse.store
+              </a>
+            </Button>
           </div>
         </div>
-      )}
-
-      {/* QR Code Container */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] transition-all duration-300">
-        <QRCodeSVG
-          value={finalUrl}
-          size={180}
-          bgColor="transparent"
-          fgColor="#2d4a36"
-          level="M"
-        />
-      </div>
-
-      <p className="text-center text-sm text-muted-foreground px-2">
-        {currentMode === "cart"
-          ? "Scan the code, or tap below to send your cart details to WhatsApp."
-          : "Scan the code, or tap below to discuss a custom order on WhatsApp."}
-      </p>
-
-      {/* Action Buttons */}
-      <div className="flex w-full flex-col gap-3">
-        <Button size="lg" className="w-full cursor-pointer gap-2" onClick={handleCheckoutClick}>
-          <MessageCircle className="size-5" />
-          {currentMode === "cart" ? "Checkout on WhatsApp" : "Talk Custom Order"}
-        </Button>
-
-        {/* Dynamic toggle link if not launched from a cart checkout */}
-        {!isCartCheckout && cartItems.length > 0 && (
-          <button
-            onClick={() => setCurrentMode((prev) => (prev === "cart" ? "custom" : "cart"))}
-            className="text-xs text-primary font-medium hover:underline cursor-pointer py-1 self-center"
-          >
-            {currentMode === "custom"
-              ? "Have items in cart? Checkout cart instead"
-              : "Need a custom order? Chat with us here"}
-          </button>
-        )}
-
-        <Button asChild variant="outline" size="lg" className="w-full cursor-pointer">
-          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-            <Instagram className="size-5" /> @pahadse.store
-          </a>
-        </Button>
       </div>
     </div>
   );

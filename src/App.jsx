@@ -3,6 +3,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SpinWheelDialog } from "@/components/SpinWheelDialog";
+import { CheckoutPage } from "@/components/CheckoutPage";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 import {
   ContactSectionFallback,
@@ -48,6 +50,15 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
+  const { currentPage, navigateTo, syncFromUrl } = useNavigationStore();
+
+  // Sync navigation state when user presses browser back/forward
+  useEffect(() => {
+    const handlePopState = () => syncFromUrl();
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [syncFromUrl]);
+
   useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
@@ -82,34 +93,40 @@ export default function App() {
       <CartProvider>
         <Analytics />
         <div className="min-h-screen bg-background text-foreground">
-          <Header />
-          <HeroSection />
-          <PromisesSection />
-          <ErrorBoundary>
-            <Suspense fallback={<ProductsSectionFallback />}>
-              <LazyProductsSection />
-            </Suspense>
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <Suspense fallback={<StorySectionFallback />}>
-              <LazyStorySection />
-            </Suspense>
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <Suspense fallback={<TestimonialsSectionFallback />}>
-              <LazyTestimonialsSection />
-            </Suspense>
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <Suspense fallback={<ContactSectionFallback />}>
-              <LazyContactSection />
-            </Suspense>
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <Suspense fallback={<FooterFallback />}>
-              <LazyFooter />
-            </Suspense>
-          </ErrorBoundary>
+          {currentPage === "checkout" ? (
+            <CheckoutPage onBack={() => { navigateTo("home"); window.scrollTo(0, 0); }} />
+          ) : (
+            <>
+              <Header onCheckout={() => { navigateTo("checkout"); window.scrollTo(0, 0); }} />
+              <HeroSection />
+              <PromisesSection />
+              <ErrorBoundary>
+                <Suspense fallback={<ProductsSectionFallback />}>
+                  <LazyProductsSection />
+                </Suspense>
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <Suspense fallback={<StorySectionFallback />}>
+                  <LazyStorySection />
+                </Suspense>
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <Suspense fallback={<TestimonialsSectionFallback />}>
+                  <LazyTestimonialsSection />
+                </Suspense>
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <Suspense fallback={<ContactSectionFallback />}>
+                  <LazyContactSection />
+                </Suspense>
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <Suspense fallback={<FooterFallback />}>
+                  <LazyFooter />
+                </Suspense>
+              </ErrorBoundary>
+            </>
+          )}
 
           {/* Floating PWA Download Button on Mobile/Tablet */}
           {showInstallBtn && (
