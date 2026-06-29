@@ -73,7 +73,7 @@ export function Header() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"
-            className="grid size-10 place-items-center rounded-full text-primary transition-colors hover:bg-secondary"
+            className="hidden sm:grid size-10 place-items-center rounded-full text-primary transition-colors hover:bg-secondary"
           >
             <Instagram className="size-6" />
           </a>
@@ -300,7 +300,7 @@ export function Header() {
 
           <ContactDialog
             trigger={
-              <Button size="sm" className="gap-2 h-9">
+              <Button size="sm" className="hidden sm:inline-flex gap-2 h-9">
                 <MessageCircle className="size-7" /> Order
               </Button>
             }

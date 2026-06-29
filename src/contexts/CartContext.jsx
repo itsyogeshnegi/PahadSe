@@ -12,18 +12,7 @@ export function CartProvider({ children }) {
   const { user } = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const [cart, setCart] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("pahadse_cart");
-        return stored ? JSON.parse(stored) : [];
-      } catch (e) {
-        console.error("Failed to load cart from localStorage", e);
-        return [];
-      }
-    }
-    return [];
-  });
+  const [cart, setCart] = useState([]);
 
   const [shippingRegion, setShippingRegion] = useState(() => {
     if (typeof window !== "undefined") {
@@ -99,13 +88,7 @@ export function CartProvider({ children }) {
     return () => clearTimeout(timer);
   }, [cart, user, isSyncing]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("pahadse_cart", JSON.stringify(cart));
-    } catch (e) {
-      console.error("Failed to save cart to localStorage", e);
-    }
-  }, [cart]);
+  // Discarded localStorage cart sync
 
   useEffect(() => {
     try {
